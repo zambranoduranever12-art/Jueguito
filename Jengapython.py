@@ -12,25 +12,25 @@ BASE_Y = ALTO - 50
 GRAVEDAD = 0.5  # Fuerza con la que caen los bloques
 
 # Colores (RGB)
-COLOR_FONDO = (135, 206, 235)  
-COLOR_BLOQUE = (210, 180, 140) 
-COLOR_BORDE = (139, 69, 19)    
-COLOR_SUELO = (34, 139, 34)    
+COLOR_FONDO = (135, 206, 235)
+COLOR_BLOQUE = (210, 180, 140)
+COLOR_BORDE = (139, 69, 19)
+COLOR_SUELO = (34, 139, 34)
 COLOR_TEXTO = (0, 0, 0)
 
 # --- Estructura de Datos: Lista Doblemente Enlazada ---
 class NodoNivel:
     def __init__(self):
-        self.bloques = [True, True, True] 
-        self.siguiente = None 
-        self.anterior = None  
+        self.bloques = [True, True, True]
+        self.siguiente = None
+        self.anterior = None
 
 class TorreJenga:
     def __init__(self, niveles_iniciales=10):
         self.base = None
         self.cima = None
         self.niveles = 0
-        
+
         for _ in range(niveles_iniciales):
             self.agregar_piso_completo()
 
@@ -76,7 +76,7 @@ class TorreJenga:
             b = actual.bloques
             # Condiciones de derrumbe
             if b == [False, False, False] or b == [True, False, False] or b == [False, False, True]:
-                return False 
+                return False
             actual = actual.siguiente
         return True
 
@@ -88,7 +88,7 @@ def dibujar_entorno(pantalla):
 def dibujar_torre_estatica(pantalla, torre):
     actual = torre.base
     nivel_idx = 0
-    
+
     while actual:
         y_pos = BASE_Y - (nivel_idx + 1) * ALTO_BLOQUE
         for i in range(3):
@@ -105,7 +105,7 @@ def extraer_bloques_para_animacion(torre):
     bloques_fisicos = []
     actual = torre.base
     nivel_idx = 0
-    
+
     while actual:
         y_pos = BASE_Y - (nivel_idx + 1) * ALTO_BLOQUE
         for i in range(3):
@@ -131,16 +131,16 @@ def dibujar_y_actualizar_caida(pantalla, bloques_fisicos):
         b['x'] += b['vx']
         b['y'] += b['vy']
         b['rotacion'] += b['vel_rotacion']
-        
+
         # Crear superficie para poder rotar el rectángulo
         surf = pygame.Surface((ANCHO_BLOQUE, ALTO_BLOQUE), pygame.SRCALPHA)
         surf.fill(COLOR_BLOQUE)
         pygame.draw.rect(surf, COLOR_BORDE, surf.get_rect(), 2)
-        
+
         # Rotar y centrar
         surf_rotada = pygame.transform.rotate(surf, b['rotacion'])
         rect_rotado = surf_rotada.get_rect(center=(b['x'] + ANCHO_BLOQUE/2, b['y'] + ALTO_BLOQUE/2))
-        
+
         # Dibujar en pantalla
         pantalla.blit(surf_rotada, rect_rotado)
 
@@ -165,25 +165,25 @@ def iniciar_jenga():
 
             if evento.type == pygame.MOUSEBUTTONDOWN and estado_juego == "JUGANDO":
                 pos_x, pos_y = evento.pos
-                
+
                 if INICIO_X <= pos_x <= INICIO_X + (3 * ANCHO_BLOQUE) and pos_y <= BASE_Y:
                     columna = int((pos_x - INICIO_X) // ANCHO_BLOQUE)
                     nivel_clickeado = int((BASE_Y - pos_y) // ALTO_BLOQUE)
-                    
-                    if nivel_clickeado < torre.niveles - 1: 
+
+                    if nivel_clickeado < torre.niveles - 1:
                         nodo_objetivo = torre.obtener_nivel(nivel_clickeado)
-                        
+
                         if nodo_objetivo and nodo_objetivo.bloques[columna]:
                             nodo_objetivo.bloques[columna] = False
                             torre.agregar_bloque_arriba()
-                            
+
                             if not torre.verificar_estabilidad():
                                 estado_juego = "DERRUMBE"
                                 # Convertimos la lista enlazada en objetos físicos
                                 bloques_cayendo = extraer_bloques_para_animacion(torre)
                             else:
                                 jugador_actual = 2 if jugador_actual == 1 else 1
-                                
+
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_r and estado_juego == "DERRUMBE":
                     torre = TorreJenga(12)
